@@ -8,23 +8,33 @@ module.exports = class Handler {
     }
 
     init() {
-        this.textHandler()
+        this.store.initRepo().then(() => {
+            this.textHandler()
+        }).catch(err => {
+            console.log('initError', err)
+        })
+        
     }
 
     textHandler() {
-        this.bot.on('text', (msg) => {
+        this.bot.on('text', async (msg) => {
+            // console.log(msg)
             let res;
             switch (msg.text[0]) {
                 case '+':
-                    res = this.addMoney(msg.text.substr(1));
+                    res = await this.addMoney(msg.text.substr(1), msg.from);
                     break;
                 case '-':
-                    res = this.removeMoney(msg.text.substr(1))
+                    res = await this.removeMoney(msg.text.substr(1), msg.from)
                     break;
                 case '=':
-                    res = this.getTotal();
+                    res = await this.getTotal(msg.from);
+                    console.log('yay')
                     break;
-                default: 
+                case '?':
+                    res = await this.total();
+                    break;
+                default:
                     res = {text: 'Undefined command!'};
             }
 
@@ -33,30 +43,46 @@ module.exports = class Handler {
         })
     }
 
-    addMoney(text) {
-        const number = Number(text)
-        if (String(number) === 'NaN') {
-            return this.result('Введите корректно. Например: +12.5')
+    async addMoney(v, user) {
+        const number = Number(v)
+
+        if(String(number) === 'NaN') {
+            return {text: 'Не корректный формат'}
         }
-        this.store.add(number)
-        return this.result('Ok')
-    }
 
-    removeMoney(text) {
-        const number = Number(text)
-        if (String(number) === 'NaN') {
-            return this.result('Введите корректно. Например: +12.5')
+        try {
+            await this.store.addMoney(v, user);
+            return {text: 'OK'}
+        } catch (e) {
+            return {text: 'Store error'}
         }
-        this.store.remove(number)
-        return this.result('Ok')
     }
 
-    getTotal() {
-        const count = this.store.getTotal()
-        return this.result(count)
+    async removeMoney(v, user) {
+        const number = Number(v)
+
+        if(String(number) === 'NaN') {
+            return {text: 'Не корректный формат'}
+        }
+
+        try {
+            await this.store.removeMoney(v, user);
+            return {text: 'OK'}
+        } catch (e) {
+            return {text: 'Store error'}
+        }
+    }
+    async getTotal(u) {
+        try {
+            // console.log(this.store)
+            return await this.store.total(u)
+        } catch (e) {
+            console.log(e)
+            return {text: 'Error get total'}
+        }
     }
 
-    result(text) {
-        return {text}
+    async total() {
+        return await this.store.totalAll()
     }
 }

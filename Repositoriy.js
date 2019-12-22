@@ -3,7 +3,7 @@ const mongo = require('mongoose');
 const transactionSchema = new mongo.Schema({
     author: Number,
     cost: Number,
-    wallet: String
+    type: String
 })
 
 
@@ -45,6 +45,22 @@ module.exports = class Repositoriy {
             tr.save((err, res) => {
                 if (err) return j(err)
                 r(true)
+            })
+        })
+    }
+
+    countTotalByUserId(userId) {
+        return new Promise((r, j) => {
+            this.transaction.find({author: userId}).then(res => {
+                r(res)
+            })
+        })
+    }
+
+    çountTotal(){
+        return new Promise((r,j) => {
+            this.transaction.find().then(res => {
+                r(res)
             })
         })
     }
