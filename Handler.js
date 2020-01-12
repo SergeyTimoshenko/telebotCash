@@ -1,4 +1,20 @@
 const Store = require('./Store')
+
+const markupEvent = {
+    keyboard: [
+        ['-', '+', '=', '?']
+    ]
+}
+const markupNUmbers = {
+    keyboard: [
+        [{text:'1', request_location: true},'2','3']
+    ]
+}
+const opt = {
+        reply_markup: markupEvent
+           
+      };
+
 module.exports = class Handler {
     constructor(bot) {
         this.bot = bot;
@@ -17,8 +33,8 @@ module.exports = class Handler {
     }
 
     textHandler() {
-        this.bot.on('text', async (msg) => {
-            // console.log(msg)
+        this.bot.on('message', async (msg) => {
+            // console.log(msg.text)
             let res;
             switch (msg.text[0]) {
                 case '+':
@@ -38,15 +54,15 @@ module.exports = class Handler {
                     res = {text: 'Undefined command!'};
             }
 
-            msg.reply.text(res.text)
+            this.bot.sendMessage(msg.chat.id, res.text, opt)
 
         })
     }
 
     async addMoney(v, user) {
         const number = Number(v)
-
-        if(String(number) === 'NaN') {
+        
+        if(String(number) === 'NaN' || !v) {
             return {text: 'Не корректный формат'}
         }
 
@@ -61,7 +77,7 @@ module.exports = class Handler {
     async removeMoney(v, user) {
         const number = Number(v)
 
-        if(String(number) === 'NaN') {
+        if(String(number) === 'NaN' || !v) {
             return {text: 'Не корректный формат'}
         }
 

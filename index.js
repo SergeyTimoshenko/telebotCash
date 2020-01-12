@@ -1,10 +1,9 @@
-const TeleBot = require('telebot');
 const {token} = require('./env')
 
 const Handler = require('./Handler');
 
-const bot = new TeleBot(token)
+const TelegramBot = require('node-telegram-bot-api');
+
+const bot = new TelegramBot(token, {polling: true});
 
 new Handler(bot)
-
-bot.start()
